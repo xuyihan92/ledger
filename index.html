@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="zh-Hant-TW" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+<title>記帳</title>
+<meta name="theme-color" content="#eef0f3">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="記帳">
+<meta name="format-detection" content="telephone=no">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<link rel="icon" type="image/png" sizes="192x192" href="icons/icon-192.png">
+<link rel="stylesheet" href="app.css">
+</head>
+<body>
+<main id="main"></main>
+<button id="fab" data-a="fab" aria-label="記一筆"><svg viewBox="0 0 24 24" width="30" height="30"><path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"/></svg></button>
+<nav id="nav"></nav>
+<div id="layers"></div>
+<div id="toast" class="toast" role="status" aria-live="polite"></div>
+<div id="lock" class="lock"></div>
+<script src="core.js"></script>
+<script src="ui.js"></script>
+<script src="charts.js"></script>
+<script src="views.js"></script>
+<script src="form.js"></script>
+<script src="settings.js"></script>
+<script src="main.js"></script>
+</body>
+</html>
