@@ -6,7 +6,7 @@
 
 ## iPhone 安裝
 
-1. 用 **Safari** 打開 <https://xuyihan92.github.io/ledger/>
+1. 用 **Safari** 打開 <https://ledger-7pq.pages.dev/>
 2. 按「分享」按鈕，選「加入主畫面」，再按「加入」
 3. 之後都從主畫面的「記帳」圖示開啟（離線也能用）
 
