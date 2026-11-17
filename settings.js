@@ -35,7 +35,7 @@ function viewSettings() {
     ${srow('set-clear', '🗑️', '清除所有記帳紀錄', '', 'danger-row')}
   </section>
   <section class="sgroup"><h4>關於</h4>
-    <div class="about"><b>記帳</b> 1.0.1<br>資料只存在這支手機裡，不會上傳到網路。換手機前，請先用「備份資料」存一份檔案（可存到${BR ? ' Google 雲端硬碟' : '「檔案」App 或 iCloud 雲碟'}），到新手機再「從備份檔還原」。${!BR && IS_IOS ? '<br><br>iPhone 提醒：請固定從主畫面的「記帳」圖示開啟。用 Safari 分頁開的是另一份資料。' : ''}</div>
+    <div class="about"><b>記帳</b> 1.0.2<br>資料只存在這支手機裡，不會上傳到網路。換手機前，請先用「備份資料」存一份檔案（可存到${BR ? ' Google 雲端硬碟' : '「檔案」App 或 iCloud 雲碟'}），到新手機再「從備份檔還原」。${!BR && IS_IOS ? '<br><br>iPhone 提醒：請固定從主畫面的「記帳」圖示開啟。用 Safari 分頁開的是另一份資料。' : ''}</div>
   </section>`;
 }
 
@@ -85,7 +85,7 @@ function openPayManager() {
 }
 function mrowHTML(it, i, n) {
   return `<div class="mrow ${it.hide ? 'hidden' : ''}">
-    <button class="mr-main" data-m="edit" data-id="${it.id}"><span class="ic">${it.icon}</span><span class="mr-name">${esc(it.name)}${it.hide ? '<small>已隱藏</small>' : ''}</span></button>
+    <button class="mr-main" data-m="edit" data-id="${it.id}"><span class="ic">${esc(it.icon)}</span><span class="mr-name">${esc(it.name)}${it.hide ? '<small>已隱藏</small>' : ''}</span></button>
     <button class="icon-btn" data-m="up" data-id="${it.id}" ${i === 0 ? 'disabled' : ''} aria-label="上移">${ICON.up}</button>
     <button class="icon-btn" data-m="down" data-id="${it.id}" ${i === n - 1 ? 'disabled' : ''} aria-label="下移">${ICON.down}</button>
   </div>`;
@@ -210,7 +210,7 @@ function openRecurringList() {
         const c = catOf(r.cat), nx = r.on ? nextOcc(r, r.last || '') : null;
         const ended = r.end && nx && nx > r.end;
         return `<button class="row" data-r="${r.id}">
-          <span class="ic">${c.icon}</span>
+          <span class="ic">${esc(c.icon)}</span>
           <span class="row-mid"><span class="row-t">${esc(r.name || c.name)}${r.confirm ? '<span class="tag">待確認</span>' : ''}</span>
             <span class="row-s"><span>${recDesc(r)}</span><span>${!r.on ? '已暫停' : ended || !nx ? '已結束' : '下次 ' + (nx === t ? '今天' : shortDay(nx) + (nx.slice(0, 4) !== t.slice(0, 4) ? '（' + nx.slice(0, 4) + '）' : ''))}</span></span></span>
           <span class="row-r"><span class="amt ${r.type === 'in' ? 'inc' : ''}">${r.cur !== 'TWD' ? esc(curSym(r.cur)) + ' ' : ''}${num(r.amt, 2)}</span></span>
@@ -219,7 +219,7 @@ function openRecurringList() {
       return `<p class="muted small pad-x">到期日會自動記一筆。像水電這種每次金額不同的，可以勾選「到期時先讓我確認金額」，到期時會列在明細最上方等你確認。</p>
         ${rows ? `<div class="card-list">${rows}</div>` : ''}
         <h4 class="fsub pad-x">快速新增</h4>
-        <div class="tpl">${REC_TPL.map((t, i) => `<button class="chip" data-tpl="${i}">${catOf(t.cat).icon} ${esc(t.name)}</button>`).join('')}</div>
+        <div class="tpl">${REC_TPL.map((t, i) => `<button class="chip" data-tpl="${i}">${esc(catOf(t.cat).icon)} ${esc(t.name)}</button>`).join('')}</div>
         <div class="pad"><button class="btn primary big" data-tpl="-1">＋ 自訂固定收支</button></div>`;
     },
     mount: (el, L) => {
@@ -253,8 +253,8 @@ function openRecurringEditor(r, tpl, listLayer) {
           <label class="fl">金額<input class="inp" id="rf-amt" inputmode="decimal" value="${f.amt === '' ? '' : f.amt}" placeholder="${f.confirm ? '大約金額' : '0'}"></label>
           <label class="fl">幣別<select class="inp" id="rf-cur"><option value="TWD">新台幣</option>${D.curs.map(c => `<option value="${esc(c.code)}" ${f.cur === c.code ? 'selected' : ''}>${esc(c.name)}</option>`).join('')}</select></label>
         </div>
-        <label class="fl">分類<select class="inp" id="rf-cat">${catsOfType(f.type, true).map(c => `<option value="${c.id}" ${f.cat === c.id ? 'selected' : ''}>${c.icon} ${esc(c.name)}</option>`).join('')}</select></label>
-        <label class="fl">付款方式<select class="inp" id="rf-pay"><option value="">（不指定）</option>${D.pays.map(p => `<option value="${p.id}" ${f.pay === p.id ? 'selected' : ''}>${p.icon} ${esc(p.name)}</option>`).join('')}</select></label>
+        <label class="fl">分類<select class="inp" id="rf-cat">${catsOfType(f.type, true).map(c => `<option value="${c.id}" ${f.cat === c.id ? 'selected' : ''}>${esc(c.icon)} ${esc(c.name)}</option>`).join('')}</select></label>
+        <label class="fl">付款方式<select class="inp" id="rf-pay"><option value="">（不指定）</option>${D.pays.map(p => `<option value="${p.id}" ${f.pay === p.id ? 'selected' : ''}>${esc(p.icon)} ${esc(p.name)}</option>`).join('')}</select></label>
         <div class="fl-2">
           <label class="fl">多久一次<select class="inp" id="rf-freq">${FREQS.map(x => `<option value="${x.k}" ${x.k === fk ? 'selected' : ''}>${x.name}</option>`).join('')}</select></label>
           <label class="fl">${f.unit === 'week' ? '星期幾' : '每次在幾號'}<select class="inp" id="rf-day">${dayOpts}</select></label>
@@ -465,15 +465,17 @@ function restoreData() {
 window.onFileOpened = async (text, srcLabel) => {
   let obj;
   try { obj = JSON.parse(text); } catch (e) { alertBox('這個檔案不是「記帳」App 的備份檔（無法讀取）。'); return; }
-  const data = obj && obj.data ? obj.data : obj;
-  if (!data || !Array.isArray(data.tx) || !Array.isArray(data.cats)) { alertBox('這個檔案不是「記帳」App 的備份檔。'); return; }
+  const raw = obj && obj.data ? obj.data : obj;
+  if (!raw || typeof raw !== 'object' || !Array.isArray(raw.tx) || !Array.isArray(raw.cats)) { alertBox('這個檔案不是「記帳」App 的備份檔。'); return; }
+  const data = normalize(raw);           // 先清理，再顯示或使用
   const n = data.tx.length;
   const dates = data.tx.map(t => t.date).sort();
-  const when = obj.exportedAt ? new Date(obj.exportedAt).toLocaleString('zh-TW', { hour12: false }) : (srcLabel || '');
+  const wd = obj.exportedAt ? new Date(obj.exportedAt) : null;
+  const when = wd && !isNaN(wd) ? wd.toLocaleString('zh-TW', { hour12: false }) : cleanText(srcLabel, 60);
   const ok = await confirmBox(`備份檔有 <b>${n}</b> 筆紀錄${n ? `（${dates[0]}～${dates[n - 1]}）` : ''}${when ? `，建立於 ${esc(when)}` : ''}。<br><br>還原後會<b>取代</b>手機上目前的所有資料，確定要還原嗎？`, '還原', true, '從備份還原');
   if (!ok) return;
   const keepLock = { lock: D.set.lock, pinHash: D.set.pinHash, pinSalt: D.set.pinSalt, pinLen: D.set.pinLen, pinHint: D.set.pinHint };
-  D = normalize(data);
+  D = data;
   Object.assign(D.set, keepLock);     // 密碼沿用這支手機目前的設定
   runRecurring(); save(); applyFont(); applyTheme();
   while (layers.length) closeLayer(layers[layers.length - 1]);

@@ -99,7 +99,7 @@ function rankList(rows, total, action, extra) {
   const max = rows[0].sum || 1;
   return `<div class="rank">${rows.map(r => `
     <button class="rank-row" data-a="${action}" data-k="${esc(r.key)}" ${extra || ''}>
-      <span class="ic">${r.icon}</span>
+      <span class="ic">${esc(r.icon)}</span>
       <span class="rk-mid">
         <span class="rk-top"><span class="rk-name">${esc(r.name)}</span><span class="rk-amt">${num(r.sum, 0)}</span></span>
         <span class="rk-bar"><i style="width:${Math.max(1.5, r.sum / max * 100).toFixed(1)}%"></i></span>

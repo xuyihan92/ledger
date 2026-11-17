@@ -80,7 +80,7 @@ function openEntry(tx, preset) {
         }
       };
       const drawCats = () => {
-        q('.cat-grid').innerHTML = catsOfType(f.type).map(c => `<button class="cat ${c.id === f.cat ? 'on' : ''}" data-e="cat" data-id="${c.id}"><span class="ic">${c.icon}</span><span class="cn">${esc(c.name)}</span></button>`).join('')
+        q('.cat-grid').innerHTML = catsOfType(f.type).map(c => `<button class="cat ${c.id === f.cat ? 'on' : ''}" data-e="cat" data-id="${c.id}"><span class="ic">${esc(c.icon)}</span><span class="cn">${esc(c.name)}</span></button>`).join('')
           + `<button class="cat more" data-e="cat-edit"><span class="ic">✏️</span><span class="cn">編輯分類</span></button>`;
         drawSugg();
       };
@@ -89,7 +89,7 @@ function openEntry(tx, preset) {
         q('.en-meta').innerHTML = `<button class="icon-btn sm" data-e="d" data-v="-1" aria-label="前一天">${ICON.left}</button>
           <label class="meta-pill date-pill"><span>${ICON.cal}${f.date.slice(0, 4) !== today().slice(0, 4) ? f.date.slice(0, 4) + '/' : ''}${shortDay(f.date)}（${WD[pd(f.date).getDay()]}）${f.date === today() ? '<em>今天</em>' : f.date === addDays(today(), -1) ? '<em>昨天</em>' : ''}</span><input type="date" id="e-date" value="${f.date}" aria-label="日期"></label>
           <button class="icon-btn sm" data-e="d" data-v="1" aria-label="後一天">${ICON.right}</button>
-          <button class="meta-pill pay-pill" data-e="pay-pick">${p ? p.icon + ' ' + esc(p.name) : '💳 付款方式'} ▾</button>`;
+          <button class="meta-pill pay-pill" data-e="pay-pick">${p ? esc(p.icon) + ' ' + esc(p.name) : '💳 付款方式'} ▾</button>`;
         q('#e-date').addEventListener('change', e => { if (e.target.value) { f.date = e.target.value; drawMeta(); } });
       };
       const drawSugg = () => {

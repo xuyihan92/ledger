@@ -27,7 +27,7 @@ function rowHTML(t, showDate) {
   const c = catOf(t.cat), p = payOf(t.pay);
   const fx = t.cur && t.cur !== 'TWD';
   return `<button class="row" data-a="edit" data-id="${t.id}">
-    <span class="ic">${c.icon}</span>
+    <span class="ic">${esc(c.icon)}</span>
     <span class="row-mid">
       <span class="row-t">${esc(c.name)}${t.rec ? `<span class="rec-i" aria-label="固定收支">${ICON.repeat}</span>` : ''}</span>
       <span class="row-s">${showDate ? `<span class="rd">${shortDay(t.date)}</span>` : ''}${t.note ? `<span class="note">${esc(t.note)}</span>` : ''}${p ? `<span class="tag">${esc(p.name)}</span>` : ''}</span>
@@ -345,7 +345,7 @@ function viewBudget() {
     h += `<section class="card"><div class="card-h"><h3>分類預算</h3></div>
       ${withB.map(c => {
       const sp = r2(spentBy[c.id] || 0), bb = catB[c.id], st = budgetState(sp, bb);
-      return `<div class="brow"><span class="ic">${c.icon}</span><span class="br-mid">
+      return `<div class="brow"><span class="ic">${esc(c.icon)}</span><span class="br-mid">
           <span class="br-top"><span class="br-name">${esc(c.name)}</span><span class="st st-${st.k}">${st.icon} ${st.label}</span></span>
           ${meter(sp, bb)}
           <span class="br-sub"><span>${num(sp, 0)} ／ ${num(bb, 0)}</span><span>${sp <= bb ? '剩 ' + num(bb - sp, 0) : '超支 ' + num(sp - bb, 0)}</span></span>
@@ -354,7 +354,7 @@ function viewBudget() {
   }
   if (noB.length) {
     h += `<section class="card"><div class="card-h"><h3>未設定預算的分類</h3></div>
-      ${noB.sort((x, y) => spentBy[y.id] - spentBy[x.id]).map(c => `<div class="brow simple"><span class="ic">${c.icon}</span><span class="br-name">${esc(c.name)}</span><span class="grow"></span><span class="br-amt">${num(spentBy[c.id], 0)}</span></div>`).join('')}
+      ${noB.sort((x, y) => spentBy[y.id] - spentBy[x.id]).map(c => `<div class="brow simple"><span class="ic">${esc(c.icon)}</span><span class="br-name">${esc(c.name)}</span><span class="grow"></span><span class="br-amt">${num(spentBy[c.id], 0)}</span></div>`).join('')}
     </section>`;
   }
   return h;
@@ -369,7 +369,7 @@ function openBudgetEditor() {
       <label class="fl">提醒門檻<select class="inp" id="b-alert">${[70, 80, 90].map(v => `<option value="${v}" ${draft.alert === v ? 'selected' : ''}>用到 ${v}% 時提醒</option>`).join('')}</select></label>
       <h4 class="fsub">分類預算（每月）</h4>
       <p class="muted small">只要替需要控管的分類填金額；留白代表不設定。</p>
-      ${catsOfType('out', true).map(c => `<label class="fl-row"><span class="ic">${c.icon}</span><span class="fr-name">${esc(c.name)}</span>
+      ${catsOfType('out', true).map(c => `<label class="fl-row"><span class="ic">${esc(c.icon)}</span><span class="fr-name">${esc(c.name)}</span>
          <input class="inp sm" inputmode="decimal" data-bc="${c.id}" value="${draft.cats[c.id] || ''}" placeholder="—"></label>`).join('')}
       <div class="form-btns"><button class="btn primary big" data-a="b-save">儲存預算</button></div>
     </div>`

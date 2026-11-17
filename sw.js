@@ -1,5 +1,5 @@
 /* 記帳：離線快取。改版時把 VERSION 加一，舊快取會自動清掉 */
-const VERSION = 'ledger-1.0.1';
+const VERSION = 'ledger-1.0.2';
 const FILES = ['./', 'index.html', 'app.css', 'core.js', 'ui.js', 'charts.js', 'views.js', 'form.js', 'settings.js', 'main.js',
   'manifest.webmanifest', 'icons/icon-192.png', 'icons/icon-512.png', 'icons/apple-touch-icon.png'];
 

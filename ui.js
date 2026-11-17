@@ -93,7 +93,7 @@ function pickSheet(title, items, selected) {
   // items: [{value, label, icon, sub}]
   const html = `<div class="pick-list">${items.map((it, i) => `
       <button class="pick-item ${it.value === selected ? 'on' : ''}" data-pi="${i}">
-        ${it.icon ? `<span class="pi-ic">${it.icon}</span>` : ''}
+        ${it.icon ? `<span class="pi-ic">${esc(it.icon)}</span>` : ''}
         <span class="pi-t">${esc(it.label)}${it.sub ? `<small>${esc(it.sub)}</small>` : ''}</span>
         ${it.value === selected ? `<span class="pi-check">${ICON.check}</span>` : ''}
       </button>`).join('')}</div>`;

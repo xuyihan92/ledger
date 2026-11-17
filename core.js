@@ -114,11 +114,85 @@ function loadRaw() {
 }
 function normalize(d) {
   const def = defaults();
-  if (!d || typeof d !== 'object') return def;
+  if (!d || typeof d !== 'object' || Array.isArray(d)) return def;
   for (const k of Object.keys(def)) if (d[k] == null) d[k] = def[k];
+  if (typeof d.set !== 'object' || Array.isArray(d.set)) d.set = def.set;
+  if (typeof d.budget !== 'object' || Array.isArray(d.budget)) d.budget = def.budget;
   for (const k of Object.keys(def.set)) if (d.set[k] == null) d.set[k] = def.set[k];
   for (const k of Object.keys(def.budget)) if (d.budget[k] == null) d.budget[k] = def.budget[k];
-  if (!Array.isArray(d.tx)) d.tx = [];
+  return sanitizeData(d, def);
+}
+
+/* ============ 資料安全檢查：讀取或還原備份時，把不合格式的內容清掉 ============ */
+const SAFE_ID = /^[A-Za-z0-9_-]{1,40}$/;
+const DATE_RE = /^\d{4}-\d{2}-\d{2}$/;
+function cleanText(v, max) { return String(v == null ? '' : v).replace(/[\u0000-\u001f\u007f]/g, ' ').slice(0, max || 200); }
+function cleanIcon(v, fallback) {
+  const s = String(v == null ? '' : v).replace(/[<>"'&`=\\/\s]/g, '').slice(0, 16);
+  return s || fallback;
+}
+function cleanNum(v) { const n = Number(v); return isFinite(n) ? n : 0; }
+function sanitizeData(d, def) {
+  const remap = {};   // 不安全的 id → 新 id
+  const fixId = (id, used) => {
+    let v = String(id == null ? '' : id);
+    if (!SAFE_ID.test(v) || used.has(v)) { const n = uid(); remap[v] = n; v = n; }
+    used.add(v); return v;
+  };
+  const ref = v => { const s = String(v == null ? '' : v); return remap[s] || (SAFE_ID.test(s) ? s : ''); };
+  // 分類
+  let used = new Set();
+  d.cats = (Array.isArray(d.cats) ? d.cats : def.cats).filter(c => c && typeof c === 'object').map(c => ({
+    id: fixId(c.id, used), name: cleanText(c.name, 30) || '未命名', icon: cleanIcon(c.icon, '📦'),
+    type: c.type === 'in' ? 'in' : 'out', hide: !!c.hide
+  }));
+  if (!d.cats.some(c => c.type === 'out')) d.cats = d.cats.concat(def.cats.filter(c => c.type === 'out'));
+  if (!d.cats.some(c => c.type === 'in')) d.cats = d.cats.concat(def.cats.filter(c => c.type === 'in'));
+  // 付款方式
+  used = new Set();
+  d.pays = (Array.isArray(d.pays) ? d.pays : def.pays).filter(p => p && typeof p === 'object').map(p => ({
+    id: fixId(p.id, used), name: cleanText(p.name, 30) || '未命名', icon: cleanIcon(p.icon, '💳'), hide: !!p.hide
+  }));
+  // 幣別
+  const codes = new Set();
+  d.curs = (Array.isArray(d.curs) ? d.curs : def.curs).filter(c => c && /^[A-Z]{2,5}$/.test(String(c.code)) && c.code !== 'TWD' && !codes.has(c.code) && codes.add(c.code))
+    .map(c => ({ code: c.code, name: cleanText(c.name, 20) || c.code, sym: cleanIcon(c.sym, c.code).slice(0, 4), rate: cleanNum(c.rate) > 0 ? cleanNum(c.rate) : null, custom: !!c.custom }));
+  const curOk = c => c === 'TWD' || codes.has(c) ? c : 'TWD';
+  // 固定收支
+  used = new Set();
+  d.recs = (Array.isArray(d.recs) ? d.recs : []).filter(r => r && typeof r === 'object' && DATE_RE.test(r.start)).map(r => {
+    const unit = r.unit === 'week' ? 'week' : 'month';
+    const every = unit === 'week' ? ([1, 2].includes(+r.every) ? +r.every : 1) : ([1, 2, 3, 6, 12].includes(+r.every) ? +r.every : 1);
+    const day = unit === 'week' ? clamp(Math.floor(cleanNum(r.day)), 0, 6) : clamp(Math.floor(cleanNum(r.day)) || 1, 1, 31);
+    return {
+      id: fixId(r.id, used), type: r.type === 'in' ? 'in' : 'out', name: cleanText(r.name, 30), amt: Math.max(0, cleanNum(r.amt)),
+      cur: curOk(r.cur), cat: ref(r.cat), pay: ref(r.pay), unit, every, day, start: r.start, end: DATE_RE.test(r.end) ? r.end : '',
+      confirm: !!r.confirm, on: r.on !== false, last: DATE_RE.test(r.last) ? r.last : ''
+    };
+  });
+  // 記帳紀錄
+  used = new Set();
+  d.tx = (Array.isArray(d.tx) ? d.tx : []).filter(t => t && typeof t === 'object' && DATE_RE.test(t.date)).map(t => ({
+    id: fixId(t.id, used), type: t.type === 'in' ? 'in' : 'out', date: t.date, amt: r2(Math.abs(cleanNum(t.amt))),
+    cat: ref(t.cat), pay: ref(t.pay), note: cleanText(t.note, 80), cur: curOk(t.cur), orig: Math.abs(cleanNum(t.orig != null ? t.orig : t.amt)),
+    rate: cleanNum(t.rate) || 1, rec: t.rec ? (ref(t.rec) || 'x') : null, pending: !!t.pending, ts: cleanNum(t.ts)
+  }));
+  // 預算
+  const bc = {};
+  if (d.budget.cats && typeof d.budget.cats === 'object') for (const k of Object.keys(d.budget.cats)) { const n = cleanNum(d.budget.cats[k]); const kk = ref(k); if (kk && n > 0) bc[kk] = n; }
+  d.budget = { total: Math.max(0, cleanNum(d.budget.total)), cats: bc, alert: [70, 80, 90].includes(+d.budget.alert) ? +d.budget.alert : 80 };
+  // 設定
+  const s = d.set;
+  s.font = [0.9, 1, 1.15, 1.3, 1.5].includes(+s.font) ? +s.font : 1;
+  s.theme = ['auto', 'light', 'dark'].includes(s.theme) ? s.theme : 'auto';
+  s.lock = !!s.lock && /^[0-9a-f]{64}$/.test(String(s.pinHash));
+  s.pinLen = clamp(Math.floor(cleanNum(s.pinLen)) || 4, 4, 6);
+  s.pinHint = cleanText(s.pinHint, 40);
+  s.pinSalt = cleanText(s.pinSalt, 40);
+  s.lastCur = curOk(s.lastCur);
+  s.lastPay = ref(s.lastPay);
+  const lc = {}; if (s.lastCat && typeof s.lastCat === 'object') for (const k of ['in', 'out']) { const v = ref(s.lastCat[k]); if (v) lc[k] = v; }
+  s.lastCat = lc;
   return d;
 }
 function loadData() {
@@ -318,7 +392,12 @@ function evalExpr(s) {
 }
 
 /* ============ CSV ============ */
-function csvCell(v) { v = String(v == null ? '' : v); return /[",\n\r]/.test(v) ? '"' + v.replace(/"/g, '""') + '"' : v; }
+function csvCell(v) {
+  const isNum = typeof v === 'number';
+  v = String(v == null ? '' : v);
+  if (!isNum && /^[=+\-@\t\r]/.test(v)) v = "'" + v;      // 防止 Excel 把備註當成公式執行
+  return /[",\n\r]/.test(v) ? '"' + v.replace(/"/g, '""') + '"' : v;
+}
 function buildCSV(list) {
   const rows = [['日期', '類型', '分類', '金額（新台幣）', '幣別', '原幣金額', '匯率', '付款方式', '備註', '來源']];
   for (const t of sortTx(list).reverse()) {
